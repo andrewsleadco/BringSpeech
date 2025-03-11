@@ -1,7 +1,8 @@
 // pages/CourseEditor.jsx
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../App';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 const CourseEditor = () => {
   const { id } = useParams();
@@ -15,6 +16,7 @@ const CourseEditor = () => {
     level: 'Beginner',
     cover_image: null,
     duration: 'Self-paced',
+    price: 0,
   });
 
   const [lessons, setLessons] = useState([]);
@@ -36,15 +38,8 @@ const CourseEditor = () => {
 
   const [currentLesson, setCurrentLesson] = useState(emptyLesson);
 
-  useEffect(() => {
-    if (!isNewCourse) {
-      fetchCourseData();
-    } else {
-      setLoading(false);
-    }
-  }, [id, supabase]);
-
-  const fetchCourseData = async () => {
+  // Use useCallback to memoize the fetchCourseData function
+  const fetchCourseData = useCallback(async () => {
     try {
       // Fetch course details
       const { data: courseData, error: courseError } = await supabase
@@ -75,7 +70,15 @@ const CourseEditor = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, supabase]);
+
+  useEffect(() => {
+    if (!isNewCourse) {
+      fetchCourseData();
+    } else {
+      setLoading(false);
+    }
+  }, [id, supabase, fetchCourseData, isNewCourse]);
 
   const handleCourseChange = (e) => {
     const { name, value } = e.target;
@@ -186,7 +189,8 @@ const CourseEditor = () => {
     }
   };
 
-  const handleDragEnd = async (result) => {
+  // Implement the handleDragEnd function to actually use it
+  const handleDragEnd = (result) => {
     if (!result.destination) return;
 
     const items = Array.from(lessons);
@@ -202,23 +206,20 @@ const CourseEditor = () => {
     setLessons(updatedLessons);
 
     // Update the order in the database
-    try {
-      const updates = updatedLessons.map(lesson => ({
-        id: lesson.id,
-        order_index: lesson.order_index,
-      }));
-
-      for (const update of updates) {
-        const { error } = await supabase
-          .from('lessons')
-          .update({ order_index: update.order_index })
-          .eq('id', update.id);
-
-        if (error) throw error;
+    const updateDatabase = async () => {
+      try {
+        for (const lesson of updatedLessons) {
+          await supabase
+            .from('lessons')
+            .update({ order_index: lesson.order_index })
+            .eq('id', lesson.id);
+        }
+      } catch (error) {
+        console.error('Error updating lesson order:', error);
       }
-    } catch (error) {
-      console.error('Error updating lesson order:', error);
-    }
+    };
+
+    updateDatabase();
   };
 
   const saveCourse = async () => {
@@ -340,7 +341,7 @@ const CourseEditor = () => {
           />
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div>
             <label className="block text-gray-700 font-bold mb-2" htmlFor="level">
               Course Level
@@ -371,6 +372,23 @@ const CourseEditor = () => {
               onChange={handleCourseChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               placeholder="e.g. 2 weeks, 5 hours, Self-paced"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-gray-700 font-bold mb-2" htmlFor="price">
+              Price (USD)
+            </label>
+            <input
+              type="number"
+              id="price"
+              name="price"
+              min="0"
+              step="0.01"
+              value={course.price || 0}
+              onChange={handleCourseChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="0.00 for free courses"
             />
           </div>
         </div>
@@ -515,39 +533,58 @@ const CourseEditor = () => {
             {lessons.length === 0 ? (
               <p className="text-gray-500 italic">No lessons yet. Add your first lesson above.</p>
             ) : (
-              <div className="bg-gray-50 rounded-lg p-4">
-                <ul>
-                  {lessons.map((lesson, index) => (
-                    <li 
-                      key={lesson.id} 
-                      className="bg-white p-4 rounded-lg shadow mb-2 flex justify-between items-center"
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <Droppable droppableId="lessons">
+                  {(provided) => (
+                    <div 
+                      className="bg-gray-50 rounded-lg p-4"
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
                     >
-                      <div className="flex items-center">
-                        <div className="mr-2 text-gray-400">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
-                          </svg>
-                        </div>
-                        <span className="font-medium">{lesson.title}</span>
-                      </div>
-                      <div>
-                        <button
-                          onClick={() => editLesson(lesson)}
-                          className="text-blue-500 hover:text-blue-700 mr-2"
+                      {lessons.map((lesson, index) => (
+                        <Draggable 
+                          key={lesson.id} 
+                          draggableId={lesson.id.toString()}
+                          index={index}
                         >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => deleteLesson(lesson.id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                          {(provided) => (
+                            <li 
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="bg-white p-4 rounded-lg shadow mb-2 flex justify-between items-center list-none"
+                            >
+                              <div className="flex items-center">
+                                <div className="mr-2 text-gray-400">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
+                                  </svg>
+                                </div>
+                                <span className="font-medium">{lesson.title}</span>
+                              </div>
+                              <div>
+                                <button
+                                  onClick={() => editLesson(lesson)}
+                                  className="text-blue-500 hover:text-blue-700 mr-2"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => deleteLesson(lesson.id)}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </li>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
             )}
             
             <div className="mt-4">
