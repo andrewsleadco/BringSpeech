@@ -16,7 +16,10 @@ const Register = () => {
 
     const { data, error } = await supabase.auth.signUp({
       email,
-      password
+      password,
+      options: {
+        emailRedirectTo: 'https://bringspeech.com/account-confirmed'
+  }
     });
 
     if (error) {
