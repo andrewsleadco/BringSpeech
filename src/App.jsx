@@ -10,6 +10,7 @@ import ProfilePage from '@/pages/ProfilePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import { AuthProvider } from '@/contexts/AuthContext.jsx';
 import { CourseProvider } from '@/contexts/CourseContext.jsx';
+import AccountConfirmed from '@/pages/AccountConfirmed';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/create-course" element={<CreateCoursePage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<NotFoundPage />} />
+            <Route path="/account-confirmed" element={<AccountConfirmed />} />
           </Routes>
           <Toaster />
         </Layout>
