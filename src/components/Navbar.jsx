@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Menu, X, BookOpen, User, LogIn } from 'lucide-react';
+import { Menu, X, BookOpen, User, LogIn, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import UserAvatar from '@/components/UserAvatar';
+import { supabase } from '@/utils/supabaseClient';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { user, login, logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -20,6 +21,39 @@ const Navbar = () => {
   ];
 
   const isActive = (path) => location.pathname === path;
+
+  const handleLogin = async () => {
+    const email = prompt("Enter email:");
+    const password = prompt("Enter password:");
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      alert("Login failed: " + error.message);
+    } else {
+      alert("Login successful");
+      window.location.href = '/';
+    }
+  };
+
+  const handleRegister = async () => {
+    const email = prompt("Enter email to register:");
+    const password = prompt("Enter password:");
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password
+    });
+
+    if (error) {
+      alert("Registration failed: " + error.message);
+    } else {
+      alert("Registration successful. Please check your email to confirm your account.");
+    }
+  };
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
@@ -46,7 +80,7 @@ const Navbar = () => {
               ))}
             </div>
           </div>
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+          <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-2">
             {user ? (
               <div className="flex items-center space-x-4">
                 <Link to="/profile">
@@ -57,10 +91,16 @@ const Navbar = () => {
                 </Button>
               </div>
             ) : (
-              <Button onClick={login} className="flex items-center">
-                <LogIn className="mr-2 h-4 w-4" />
-                Login
-              </Button>
+              <>
+                <Button onClick={handleLogin} className="flex items-center">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Login
+                </Button>
+                <Button onClick={handleRegister} variant="outline" className="flex items-center">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Register
+                </Button>
+              </>
             )}
           </div>
           <div className="flex items-center sm:hidden">
@@ -106,8 +146,7 @@ const Navbar = () => {
                     <UserAvatar user={user} />
                   </div>
                   <div className="ml-3">
-                    <div className="text-base font-medium text-gray-800">{user.name}</div>
-                    <div className="text-sm font-medium text-gray-500">{user.email}</div>
+                    <div className="text-base font-medium text-gray-800">{user.email}</div>
                   </div>
                 </div>
                 <div className="mt-3 space-y-1">
@@ -130,15 +169,24 @@ const Navbar = () => {
                 </div>
               </div>
             ) : (
-              <div className="pt-4 pb-3 border-t border-gray-200">
+              <div className="pt-4 pb-3 border-t border-gray-200 space-y-2">
                 <button
                   onClick={() => {
-                    login();
+                    handleLogin();
                     toggleMenu();
                   }}
                   className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                 >
                   Login
+                </button>
+                <button
+                  onClick={() => {
+                    handleRegister();
+                    toggleMenu();
+                  }}
+                  className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                >
+                  Register
                 </button>
               </div>
             )}
