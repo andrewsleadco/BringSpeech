@@ -7,6 +7,7 @@ const Register = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -14,21 +15,33 @@ const Register = () => {
     setError('');
     setSuccess('');
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: 'https://bringspeech.com/account-confirmed'
-  }
-    });
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: 'https://bringspeech.com/account-confirmed'
+        }
+      });
 
-    if (error) {
-      setError(error.message);
-    } else {
-      setSuccess('Check your email to confirm your account.');
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          setError("This email is already registered. Please login or check your inbox for a confirmation link.");
+        } else if (error.message.includes('rate limit')) {
+          setError("Too many requests — please wait and try again shortly.");
+        } else {
+          setError(error.message);
+        }
+      } else {
+        setSuccess('Check your email to confirm your account.');
+        setCooldown(true);
+        setTimeout(() => setCooldown(false), 15000); // cooldown for 15 seconds
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -64,10 +77,13 @@ const Register = () => {
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-          disabled={loading}
+          disabled={loading || cooldown}
         >
-          {loading ? 'Creating account...' : 'Register'}
+          {loading ? 'Creating account...' : cooldown ? 'Please wait...' : 'Register'}
         </button>
+
+        {/* Optional future: Resend link button */}
+        {/* <button onClick={handleResend} disabled={!email}>Resend Confirmation Email</button> */}
       </form>
     </div>
   );
