@@ -20,8 +20,8 @@ const Login = () => {
     if (error) {
       setError(error.message);
     } else {
-      // Session handled automatically by AuthContext
-      window.location.href = '/'; // redirect on success
+      // let AuthContext handle session change
+      window.location.href = '/';
     }
 
     setLoading(false);
