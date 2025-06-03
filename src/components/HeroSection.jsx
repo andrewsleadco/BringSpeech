@@ -22,7 +22,7 @@ const HeroSection = () => {
             </h1>
             
             <p className="text-lg md:text-xl text-gray-600 mb-8">
-              Create and join online courses on LearnHub. Expand your skills, share your expertise, 
+              Create and join online courses on BringSpeech. Expand your skills, share your expertise, 
               and connect with learners worldwide on our interactive learning platform.
             </p>
             

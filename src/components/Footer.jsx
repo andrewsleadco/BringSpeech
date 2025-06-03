@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center">
               <BookOpen className="h-8 w-8 text-primary" />
-              <span className="ml-2 text-xl font-bold text-gray-900">LearnHub</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">BringSpeech</span>
             </div>
             <p className="mt-4 text-base text-gray-500">
               Empowering learners worldwide with accessible, high-quality online courses.
@@ -84,7 +84,7 @@ const Footer = () => {
         </div>
         <div className="mt-12 border-t border-gray-200 pt-8">
           <p className="text-base text-gray-400 text-center">
-            &copy; {new Date().getFullYear()} LearnHub. All rights reserved.
+            &copy; {new Date().getFullYear()} BringSpeech. All rights reserved.
           </p>
         </div>
       </div>

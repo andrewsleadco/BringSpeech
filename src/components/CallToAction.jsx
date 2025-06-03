@@ -23,7 +23,7 @@ const CallToAction = () => {
                 Ready to Start Your Learning Journey?
               </h2>
               <p className="text-lg text-gray-600 mb-8">
-                Join thousands of students and instructors on LearnHub. Create your own course or find the perfect one to enhance your skills.
+                Join thousands of students and instructors on BringSpeech. Create your own course or find the perfect one to enhance your skills.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/courses">

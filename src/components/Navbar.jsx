@@ -28,7 +28,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
               <BookOpen className="h-8 w-8 text-primary" />
-              <span className="ml-2 text-xl font-bold text-gray-900">LearnHub</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">BringSpeech</span>
             </Link>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navLinks.map((link) => (
