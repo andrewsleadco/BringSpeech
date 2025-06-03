@@ -1,69 +1,46 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/utils/supabaseClient';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const { toast } = useToast();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('bringspeech_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Failed to parse stored user:', error);
-        localStorage.removeItem('bringspeech_user');
+    const getSession = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user) {
+        setUser(data.user);
+      } else {
+        setUser(null);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    getSession();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
-  const login = () => {
-    const mockUser = {
-      id: 'user_' + Math.random().toString(36).substr(2, 9),
-      name: 'Demo User',
-      email: 'demo@example.com',
-      role: 'student',
-      enrolledCourses: [],
-      createdCourses: []
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('bringspeech_user', JSON.stringify(mockUser));
-    
-    toast({
-      title: "Welcome!",
-      description: "You've successfully logged in",
-    });
-  };
-
-  const logout = () => {
+  const signOut = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem('bringspeech_user');
-    
-    toast({
-      title: "Logged out",
-      description: "You've been successfully logged out",
-    });
-  };
-
-  const updateUser = (updatedData) => {
-    const updatedUser = { ...user, ...updatedData };
-    setUser(updatedUser);
-    localStorage.setItem('bringspeech_user', JSON.stringify(updatedUser));
   };
 
   const value = {
     user,
     loading,
-    login,
-    logout,
-    updateUser
+    signOut
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
