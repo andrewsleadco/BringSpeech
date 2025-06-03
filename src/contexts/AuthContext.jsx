@@ -11,13 +11,13 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('learnhub_user');
+    const storedUser = localStorage.getItem('bringspeech_user');
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch (error) {
         console.error('Failed to parse stored user:', error);
-        localStorage.removeItem('learnhub_user');
+        localStorage.removeItem('bringspeech_user');
       }
     }
     setLoading(false);
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     };
     
     setUser(mockUser);
-    localStorage.setItem('learnhub_user', JSON.stringify(mockUser));
+    localStorage.setItem('bringspeech_user', JSON.stringify(mockUser));
     
     toast({
       title: "Welcome!",
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('learnhub_user');
+    localStorage.removeItem('bringspeech_user');
     
     toast({
       title: "Logged out",
@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
   const updateUser = (updatedData) => {
     const updatedUser = { ...user, ...updatedData };
     setUser(updatedUser);
-    localStorage.setItem('learnhub_user', JSON.stringify(updatedUser));
+    localStorage.setItem('bringspeech_user', JSON.stringify(updatedUser));
   };
 
   const value = {

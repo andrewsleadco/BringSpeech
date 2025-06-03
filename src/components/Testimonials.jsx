@@ -7,21 +7,21 @@ const testimonials = [
     id: 1,
     name: 'Sarah Johnson',
     role: 'Web Developer',
-    content: 'LearnHub completely transformed my career. The programming courses were comprehensive and practical. I landed my dream job just two months after completing the React course!',
+    content: 'BringSpeech completely transformed my career. The programming courses were comprehensive and practical. I landed my dream job just two months after completing the React course!',
     rating: 5,
   },
   {
     id: 2,
     name: 'Michael Chen',
     role: 'UX Designer',
-    content: 'The design courses on LearnHub are top-notch. The instructors are industry professionals who provide valuable insights and feedback. Highly recommended for anyone looking to improve their design skills.',
+    content: 'The design courses on BringSpeech are top-notch. The instructors are industry professionals who provide valuable insights and feedback. Highly recommended for anyone looking to improve their design skills.',
     rating: 5,
   },
   {
     id: 3,
     name: 'Emily Rodriguez',
     role: 'Marketing Specialist',
-    content: 'I created my first course on LearnHub last year and the experience has been amazing. The platform is intuitive and the community is supportive. My course now has over 500 students!',
+    content: 'I created my first course on BringSpeech last year and the experience has been amazing. The platform is intuitive and the community is supportive. My course now has over 500 students!',
     rating: 4,
   },
 ];
@@ -33,7 +33,7 @@ const Testimonials = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">What Our Users Say</h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Hear from our community of learners and instructors about their experiences with LearnHub
+            Hear from our community of learners and instructors about their experiences with BringSpeech
           </p>
         </div>
 
